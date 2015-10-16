@@ -4,16 +4,6 @@
 #include "FlowEdge.h"
 
 template<typename W>
-int FlowEdge<W>::getNum() const {
-	return num;
-}
-
-template<typename W>
-int FlowEdge<W>::getVert() const {
-	return vert;
-}
-
-template<typename W>
 W FlowEdge<W>::getCap() const {
 	return cap;
 }

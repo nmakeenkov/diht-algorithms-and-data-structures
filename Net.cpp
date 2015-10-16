@@ -4,79 +4,9 @@
 #include"Net.h"
 #include<queue>
 
-template<typename W>
-size_t Net<W>::getV() const {
+template<typename CapacityType>
+size_t Net<CapacityType>::getV() const {
 	return e.size();
-}
-
-template<typename W>
-void Net<W>::bfs(int start, std::vector<int> &dist) const {
-	dist.resize(e.size());
-	for (int i = 0; i < (int)dist.size(); ++i) {
-		dist[i] = -1;
-	}
-	std::queue<int> q;
-	q.push(start);
-	dist[start] = 0;
-	while (!q.empty()) {
-		int v = q.front();
-		q.pop();
-		for (int i = 0; i < (int)e[v].size(); ++i) {
-			int to = e[v][i]->getVert();
-			if (dist[to] == -1 && e[v][i]->getCap()
-					- e[v][i]->getFlow() > W()) {
-				dist[to] = dist[v] + 1;
-				q.push(to);
-			}
-		}
-	}
-}
-
-template<typename W>
-W Net<W>::dfs(int v, int t, W flow, 
-		std::vector<int> const &lev, std::vector<int> &ind) {
-	if (v == t) {
-		return flow;
-	}
-	W ans = W();
-	for (;ind[v] < (int)e[v].size(); ++ind[v]) {
-		int to = e[v][ind[v]]->getVert();
-		if (lev[to] != lev[v] + 1) {
-			continue;
-		}
-		W cur = dfs(to, t, std::min(flow, 
-				e[v][ind[v]]->getCap() - e[v][ind[v]]->getFlow()),
-				lev, ind);
-		e[v][ind[v]]->incFlow(cur);
-		ans += cur;
-		flow -= cur;
-		if (flow == W()) { // do not ind++
-			return ans;
-		}
-	}
-	return ans;
-}
-
-template<typename W>
-void Net<W>::runDinic(int s, int t) {
-	flow = W();
-	while (true) {
-		std::vector<int> dist;
-		bfs(s, dist);
-		if (dist[t] == -1) {
-			break;
-		}
-		long long w;
-		for (int i = 0; i < (int)e[s].size(); ++i) {
-			w += e[s][i]->getCap() - e[s][i]->getFlow();
-		}
-		std::vector<int> ind(e.size(), 0);
-		long long pushed = 1488;
-		while (pushed > 0) {
-			pushed = dfs(s, t, w, dist, ind);
-			flow += pushed;
-		}
-	}
 }
 
 template<typename W>

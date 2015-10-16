@@ -3,22 +3,20 @@
 
 #include<vector>
 #include<iostream>
+#include"Edge.h"
 
 template<typename W>
-class FlowEdge {
+class FlowEdge : public Edge {
 private:
-	int num, vert;
 	W cap, flow;
 	FlowEdge *rev;
 public:
-	FlowEdge() : num(-1), vert(-1), cap(W()), flow(W()), rev(NULL) {}
+	FlowEdge() : Edge(), cap(W()), flow(W()), rev(NULL) {}
 	FlowEdge(int _num, int _vert, W _cap, W _flow = 0) :
-			num(_num), vert(_vert), cap(_cap), flow(_flow), rev(NULL) {}
+			Edge(_num, _vert), cap(_cap), flow(_flow), rev(NULL) {}
 	FlowEdge(int _vert, FlowEdge *_rev) : 
-			num(-1), vert(_vert), cap(W()), flow(W()), rev(_rev) {}
+			Edge(-1, _vert), cap(W()), flow(W()), rev(_rev) {}
 	
-	int getNum() const;
-	int getVert() const;
 	FlowEdge<W> *getRev() const;
 	W getCap() const;
 	W getFlow() const;

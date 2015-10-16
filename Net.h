@@ -6,38 +6,37 @@
 #include<istream>
 #include<ostream>
 #include"FlowEdge.h"
+#include"Graph.h"
 
-template<typename W>
+template<typename CapacityType>
 class Net;
 
-template<typename W>
-std::istream &operator>>(std::istream &in, Net<W> &g);
+template<typename CapacityType>
+std::istream &operator>>(std::istream &in, Net<CapacityType> &g);
 
-template<typename W>
-std::ostream &operator<<(std::ostream &out, Net<W> &g);
+template<typename CapacityType>
+std::ostream &operator<<(std::ostream &out, Net<CapacityType> &g);
 
-template<typename W>
-class Net {
-private:
-	W flow;
-	std::vector<std::vector<FlowEdge<W> *> > e;
+template<typename CapacityType>
+class Net : public Graph {
+protected:
+	CapacityType flow;
+	std::vector<std::vector<FlowEdge<CapacityType> *> > e;
 public:
-	Net() {}
+	Net() : Graph() {}
 	
 	size_t getV() const;
-	void bfs(int s, std::vector<int> &dist) const;
-	W dfs(int v, int t, W flow, std::vector<int> const &lev,
-			std::vector<int> &ind);
-	void runDinic(int s, int t);
 	void relable(int v, std::vector<int> &h, std::vector<int> &hCnt);
-	void push(int v, FlowEdge<W> *u, std::vector<W> &exc,
-			std::queue<int> &q);
+	void push(int v, FlowEdge<CapacityType> *u, 
+			std::vector<CapacityType> &exc, std::queue<int> &q);
 	void runPreflowPush(int s, int t);
 
-	friend std::istream &operator>> <>(std::istream &in, Net<W> &g);
-	friend std::ostream &operator<< <>(std::ostream &out, Net<W> &g);
+	friend std::istream &operator>> <>(std::istream &in, 
+			Net<CapacityType> &g);
+	friend std::ostream &operator<< <>(std::ostream &out, 
+			Net<CapacityType> &g);
 };
 
-#include "Net.cpp"
+#include"Net.cpp"
 
 #endif
