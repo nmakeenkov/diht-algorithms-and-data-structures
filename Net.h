@@ -26,10 +26,6 @@ public:
 	Net() : Graph() {}
 	
 	size_t getV() const;
-	void relable(int v, std::vector<int> &h, std::vector<int> &hCnt);
-	void push(int v, FlowEdge<CapacityType> *u, 
-			std::vector<CapacityType> &exc, std::queue<int> &q);
-	void runPreflowPush(int s, int t);
 
 	friend std::istream &operator>> <>(std::istream &in, 
 			Net<CapacityType> &g);

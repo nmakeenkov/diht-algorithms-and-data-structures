@@ -18,10 +18,6 @@ public:
 			std::vector<int> &ind);
 	void runDinic(int s, int t);
 
-	/*
-	friend void BFSGraph<DinicFlowSolver, EdEx>::bfs(DinicFlowSolver const &g, 
-			int start, std::vector<int> &dist);
-	*/
 	friend class BFSGraph<DinicFlowSolver, EdEx>;
 };
 
