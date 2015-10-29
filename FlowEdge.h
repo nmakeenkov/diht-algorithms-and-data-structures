@@ -5,23 +5,28 @@
 #include<iostream>
 #include"Edge.h"
 
-template<typename W>
+template<typename CapacityType>
 class FlowEdge : public Edge {
 private:
-	W cap, flow;
-	FlowEdge *rev;
+	CapacityType capacity, flow;
+	FlowEdge *reversedEdge;
 public:
-	FlowEdge() : Edge(), cap(W()), flow(W()), rev(NULL) {}
-	FlowEdge(int _num, int _vert, W _cap, W _flow = 0) :
-			Edge(_num, _vert), cap(_cap), flow(_flow), rev(NULL) {}
-	FlowEdge(int _vert, FlowEdge *_rev) : 
-			Edge(-1, _vert), cap(W()), flow(W()), rev(_rev) {}
+	FlowEdge() : Edge(), capacity(CapacityType()), flow(CapacityType()),
+				 reversedEdge(NULL) {}
+	FlowEdge(int _id, int _startVertex, int _finishVertex,
+			 CapacityType _capacity, CapacityType _flow = CapacityType()) :
+			Edge(_id, _startVertex, _finishVertex), capacity(_capacity), flow(_flow),
+			reversedEdge(NULL) {}
+	FlowEdge(FlowEdge *_reversedEdge) :
+			Edge(-1, _reversedEdge->getFinishVertex(), _reversedEdge->getStartVertex()),
+			capacity(CapacityType()), flow(CapacityType()), reversedEdge(_reversedEdge) {}
 	
-	FlowEdge<W> *getRev() const;
-	W getCap() const;
-	W getFlow() const;
-	void setRev(FlowEdge<W> *_rev);
-	void incFlow(W d);
+	FlowEdge<CapacityType> *getReversedEdge() const;
+	CapacityType getCapacity() const;
+	CapacityType getFlow() const;
+
+	void setReversedEdge(FlowEdge<CapacityType> *_reversedEdge);
+	void incFlow(CapacityType d);
 };
 
 #include"FlowEdge.cpp"

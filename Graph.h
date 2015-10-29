@@ -6,7 +6,7 @@
 #include"Edge.h"
 
 class Graph {
-private:
+protected:
 	std::vector<std::vector<Edge*> > e;
 public:
 	Graph() {}

@@ -4,10 +4,10 @@
 #include<vector>
 #include"Graph.h"
 
-template<typename Graph, typename EdgeExists>
+template<typename Graph, typename IsValidEdgeFunction>
 class BFSGraph {
 public:
-	static void bfs(Graph const &g, int s, std::vector<int> &dist);
+	static void bfs(Graph const &graph, int start, std::vector<int> &distanceToVertex);
 };
 
 #include"BFSGraph.cpp"

@@ -6,34 +6,35 @@
 #include<queue>
 
 template<typename CapacityType>
-class DinicFlowSolver<CapacityType>::EdEx {
+class DinicFlowSolver<CapacityType>::EdgeIsNotFull {
 public:
-	bool operator()(FlowEdge<CapacityType> * const &e) {
-		return (e->getCap() - e->getFlow());
+	bool operator()(FlowEdge<CapacityType> * const &edge) {
+		return (edge->getCapacity() - edge->getFlow());
 	}
 };
 
 template<typename CapacityType>
-CapacityType DinicFlowSolver<CapacityType>::dfs(int v, int t, 
-		CapacityType flow, std::vector<int> const &lev, 
-		std::vector<int> &ind) {
-	if (v == t) {
-		return flow;
+CapacityType DinicFlowSolver<CapacityType>::dfs(int vertex, int sink, CapacityType flowToPush,
+                                                std::vector<int> const &levelOfVertex,
+                                                std::vector<int> &indexOfEdge) {
+	if (vertex == sink) {
+		return flowToPush;
 	}
 	CapacityType ans = CapacityType();
-	for (;ind[v] < (int)Net<CapacityType>::e[v].size(); ++ind[v]) {
-		FlowEdge<CapacityType> *ed = (FlowEdge<CapacityType> *)
-				Net<CapacityType>::e[v][ind[v]];
-		int to = ed->getVert();
-		if (lev[to] != lev[v] + 1) {
+	for (;indexOfEdge[vertex] < (int)Net<CapacityType>::e[vertex].size();
+          ++indexOfEdge[vertex]) {
+		FlowEdge<CapacityType> *edge = Net<CapacityType>::e[vertex][indexOfEdge[vertex]];
+		int to = edge->getFinishVertex();
+		if (levelOfVertex[to] != levelOfVertex[vertex] + 1) {
 			continue;
 		}
-		CapacityType cur = dfs(to, t, std::min(flow, ed->getCap() 
-				- ed->getFlow()), lev, ind);
-		ed->incFlow(cur);
-		ans += cur;
-		flow -= cur;
-		if (flow == CapacityType()) { // do not ind++
+		CapacityType flowAdded = dfs(to, sink, std::min(flowToPush, edge->getCapacity()
+																	- edge->getFlow()),
+									 levelOfVertex, indexOfEdge);
+		edge->incFlow(flowAdded);
+		ans += flowAdded;
+		flowToPush -= flowAdded;
+		if (flowToPush == CapacityType()) { // everything pushed - do not increment the index
 			return ans;
 		}
 	}
@@ -41,26 +42,23 @@ CapacityType DinicFlowSolver<CapacityType>::dfs(int v, int t,
 }
 
 template<typename CapacityType>
-void DinicFlowSolver<CapacityType>::runDinic(int s, int t) {
+void DinicFlowSolver<CapacityType>::runDinic(int source, int sink) {
 	Net<CapacityType>::flow = CapacityType();
 	while (true) {
-		std::vector<int> dist;
-		BFSGraph<DinicFlowSolver, EdEx>::bfs(*this, s, dist);
-		if (dist[t] == -1) {
+		std::vector<int> distaneToVertex;
+		BFSGraph<DinicFlowSolver, EdgeIsNotFull>::bfs(*this, source, distaneToVertex);
+		if (distaneToVertex[sink] == -1) {
 			break;
 		}
-		CapacityType w;
-		for (int i = 0; i < (int)Net<CapacityType>::e[s].size(); ++i) {
-			FlowEdge<CapacityType> *ed = (FlowEdge<CapacityType> *)
-					Net<CapacityType>::e[s][i];
-			w += ed->getCap() - ed->getFlow();
+		CapacityType MaxFlowPossible = CapacityType();
+		for (int i = 0; i < (int)Net<CapacityType>::e[source].size(); ++i) {
+			FlowEdge<CapacityType> *edge = (FlowEdge<CapacityType> *)
+                    Net<CapacityType>::e[source][i];
+			MaxFlowPossible += edge->getCapacity() - edge->getFlow();
 		}
-		std::vector<int> ind(Net<CapacityType>::e.size(), 0);
-		CapacityType pushed;
-		do {
-			pushed = dfs(s, t, w, dist, ind);
-			Net<CapacityType>::flow += pushed;
-		} while (pushed > CapacityType());
+		std::vector<int> indexOfEdge(Net<CapacityType>::e.size(), 0);
+		CapacityType pushed = dfs(source, sink, MaxFlowPossible, distaneToVertex, indexOfEdge);
+        Net<CapacityType>::flow += pushed;
 	}
 }
 

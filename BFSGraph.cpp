@@ -4,25 +4,25 @@
 #include"BFSGraph.h"
 #include<queue>
 
-template <typename Graph, typename EdgeExists>
-void BFSGraph<Graph, EdgeExists>::bfs(Graph const &g, int start, 
-		std::vector<int> &dist) {
-	dist.resize(g.getV());
-	for (int i = 0; i < (int)dist.size(); ++i) {
-		dist[i] = -1;
+template <typename Graph, typename IsValidEdgeFunction>
+void BFSGraph<Graph, IsValidEdgeFunction>::bfs(Graph const &graph, int start,
+		std::vector<int> &distanceToVertex) {
+	distanceToVertex.resize(graph.getV());
+	for (int i = 0; i < (int)distanceToVertex.size(); ++i) {
+		distanceToVertex[i] = -1;
 	}
-	std::queue<int> q;
-	q.push(start);
-	dist[start] = 0;
-	EdgeExists check;
-	while (!q.empty()) {
-		int v = q.front();
-		q.pop();
-		for (int i = 0; i < (int)g.e[v].size(); ++i) {
-			int to = g.e[v][i]->getVert();
-			if (dist[to] == -1 && check(g.e[v][i])) {
-				dist[to] = dist[v] + 1;
-				q.push(to);
+	std::queue<int> vertexQueue;
+	vertexQueue.push(start);
+	distanceToVertex[start] = 0;
+	IsValidEdgeFunction check;
+	while (!vertexQueue.empty()) {
+		int v = vertexQueue.front();
+		vertexQueue.pop();
+		for (int i = 0; i < (int)graph.e[v].size(); ++i) {
+			int to = graph.e[v][i]->getFinishVertex();
+			if (distanceToVertex[to] == -1 && check(graph.e[v][i])) {
+				distanceToVertex[to] = distanceToVertex[v] + 1;
+				vertexQueue.push(to);
 			}
 		}
 	}

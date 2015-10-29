@@ -9,8 +9,8 @@ size_t Net<CapacityType>::getV() const {
 	return e.size();
 }
 
-template<typename W>
-std::istream &operator>>(std::istream &in, Net<W> &g) {
+template<typename CapacityType>
+std::istream &operator>>(std::istream &in, Net<CapacityType> &g) {
 	int n, m;
 	in >> n >> m;
 	g.e.resize(n);
@@ -19,28 +19,28 @@ std::istream &operator>>(std::istream &in, Net<W> &g) {
 		in >> f >> t >> c;
 		f--;
 		t--;
-		FlowEdge<W> *dir = new FlowEdge<W>(i, t, c);
-		FlowEdge<W> *rev = new FlowEdge<W>(f, dir);
-		dir->setRev(rev);
+		FlowEdge<CapacityType> *dir = new FlowEdge<CapacityType>(i, f, t, c);
+		FlowEdge<CapacityType> *rev = new FlowEdge<CapacityType>(dir);
+		dir->setReversedEdge(rev);
 		g.e[f].push_back(dir);
 		g.e[t].push_back(rev);
 	}
 	return in;
 }
 
-template<typename W>
-std::ostream &operator<<(std::ostream &out, Net<W> &g) {
+template<typename CapacityType>
+std::ostream &operator<<(std::ostream &out, Net<CapacityType> &g) {
 	out << g.flow << "\n";
 	int maxNum = 0;
 	for (int i = 0; i < (int)g.e.size(); ++i) {
 		maxNum += g.e[i].size();
 	}
 	maxNum /= 2; // reversed are fakes
-	std::vector<W> ans(maxNum);
+	std::vector<CapacityType> ans(maxNum);
 	for (int i = 0; i < (int)g.e.size(); ++i) {
 		for (int j = 0; j < (int)g.e[i].size(); ++j) {
-			if (g.e[i][j]->getNum() != -1)  { // not a fake
-				ans[g.e[i][j]->getNum()] = g.e[i][j]->getFlow();
+			if (g.e[i][j]->getID() != -1)  { // not a fake
+				ans[g.e[i][j]->getID()] = g.e[i][j]->getFlow();
 			}
 		}
 	}

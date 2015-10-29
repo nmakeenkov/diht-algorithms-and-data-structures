@@ -3,30 +3,30 @@
 
 #include "FlowEdge.h"
 
-template<typename W>
-W FlowEdge<W>::getCap() const {
-	return cap;
+template<typename CapacityType>
+CapacityType FlowEdge<CapacityType>::getCapacity() const {
+	return capacity;
 }
 
-template<typename W>
-W FlowEdge<W>::getFlow() const {
+template<typename CapacityType>
+CapacityType FlowEdge<CapacityType>::getFlow() const {
 	return flow;
 }
 
-template<typename W>
-FlowEdge<W> *FlowEdge<W>::getRev() const {
-	return rev;
+template<typename CapacityType>
+FlowEdge<CapacityType> *FlowEdge<CapacityType>::getReversedEdge() const {
+	return reversedEdge;
 }
 
-template<typename W>
-void FlowEdge<W>::setRev(FlowEdge<W> *_rev) {
-	rev = _rev;
+template<typename CapacityType>
+void FlowEdge<CapacityType>::setReversedEdge(FlowEdge<CapacityType> *_reversedEdge) {
+	reversedEdge = _reversedEdge;
 }
 
-template<typename W>
-void FlowEdge<W>::incFlow(W d) {
+template<typename CapacityType>
+void FlowEdge<CapacityType>::incFlow(CapacityType d) {
 	flow += d;
-	rev->flow -= d;
+	reversedEdge->flow -= d;
 }
 
 #endif

@@ -3,12 +3,16 @@
 
 #include"Edge.h"
 
-int Edge::getNum() const {
-	return num;
+int Edge::getID() const {
+	return id;
 }
 
-int Edge::getVert() const {
-	return vert;
+int Edge::getStartVertex() const {
+	return startVertex;
+}
+
+int Edge::getFinishVertex() const {
+	return finishVertex;
 }
 
 #endif

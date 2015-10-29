@@ -9,16 +9,16 @@
 template<typename CapacityType>
 class DinicFlowSolver : public Net<CapacityType> {
 private:
-	class EdEx;
+	class EdgeIsNotFull;
+	CapacityType dfs(int vertex, int sink, CapacityType flowToPush,
+					 std::vector<int> const &levelOfVertex,
+					 std::vector<int> &indexOfEdge);
 public:
 	DinicFlowSolver() : Net<CapacityType>() {}
-	
-	CapacityType dfs(int v, int t, CapacityType flow, 
-			std::vector<int> const &lev,
-			std::vector<int> &ind);
-	void runDinic(int s, int t);
 
-	friend class BFSGraph<DinicFlowSolver, EdEx>;
+	void runDinic(int source, int sink);
+
+	friend class BFSGraph<DinicFlowSolver, EdgeIsNotFull>;
 };
 
 #include"DinicFlowSolver.cpp"

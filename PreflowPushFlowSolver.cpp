@@ -6,18 +6,18 @@
 
 template<typename CapacityType>
 void PreflowPushFlowSolver<CapacityType>::relable(int v) {
-	int newh = Net<CapacityType>::getV() * 2;
+	int newHeight = Net<CapacityType>::getV() * 2;
 	for (int i = 0; i < (int)Net<CapacityType>::e[v].size(); ++i) {
-		FlowEdge<CapacityType> *ed = Net<CapacityType>::e[v][i];
-		if (ed->getCap() > ed->getFlow()) {
-			newh = std::min(h[ed->getVert()] + 1, newh);
+		FlowEdge<CapacityType> *edge = Net<CapacityType>::e[v][i];
+		if (edge->getCapacity() > edge->getFlow()) {
+			newHeight = std::min(h[edge->getFinishVertex()] + 1, newHeight);
 		}
 	}
 	hCnt[h[v]]--;
 	int gapC = Net<CapacityType>::getV();
 	if (hCnt[h[v]] == 0)
 		gapC = h[v];	
-	h[v] = newh;
+	h[v] = newHeight;
 	hCnt[h[v]]++;
 	if (gapC < Net<CapacityType>::getV()) {
 		for (int i = 0; i < (int)h.size(); ++i) {
@@ -33,10 +33,10 @@ void PreflowPushFlowSolver<CapacityType>::relable(int v) {
 template<typename CapacityType>
 void PreflowPushFlowSolver<CapacityType>::push(int v, 
 		FlowEdge<CapacityType> *e) {
-	CapacityType f = std::min(exc[v], e->getCap() - e->getFlow());
+	CapacityType f = std::min(exc[v], e->getCapacity() - e->getFlow());
 	e->incFlow(f);
 	exc[v] -= f;
-	int u = e->getVert();
+	int u = e->getFinishVertex();
 	exc[u] += f;
 	if (exc[u] > CapacityType() && exc[u] <= f) { // was <= 0 
 			// and now >= 0
@@ -56,12 +56,12 @@ void PreflowPushFlowSolver<CapacityType>::runPreflowPush(int s,
 			CapacityType());
 	for (int i = 0; i < (int)Net<CapacityType>::e[s].size(); ++i) {
 		FlowEdge<CapacityType> *ed = Net<CapacityType>::e[s][i];
-		ed->incFlow(ed->getCap());
-		exc[ed->getVert()] += ed->getCap();
-		exc[s] -= ed->getCap();
+		ed->incFlow(ed->getCapacity());
+		exc[ed->getFinishVertex()] += ed->getCapacity();
+		exc[s] -= ed->getCapacity();
 	}
 	for (int i = 0; i < (int)Net<CapacityType>::e[t].size(); ++i) {
-		exc[t] -= Net<CapacityType>::e[t][i]->getRev()->getCap();
+		exc[t] -= Net<CapacityType>::e[t][i]->getReversedEdge()->getCapacity();
 	}
 	for (int i = 0; i < (int)Net<CapacityType>::getV(); ++i) {
 		if (exc[i] > 0) {
@@ -79,8 +79,8 @@ void PreflowPushFlowSolver<CapacityType>::runPreflowPush(int s,
 			} else {
 				FlowEdge<CapacityType> *ed = 
 						Net<CapacityType>::e[v][ind[v]];
-				if (ed->getCap() - ed->getFlow() > CapacityType() 
-						&& h[ed->getVert()] == h[v] - 1) {
+				if (ed->getCapacity() - ed->getFlow() > CapacityType()
+						&& h[ed->getFinishVertex()] == h[v] - 1) {
 					push(v, ed);		
 				} else {
 					ind[v]++;

@@ -3,13 +3,16 @@
 
 class Edge {
 private:
-	int num, vert;
+	int id, startVertex, finishVertex;
 public:
-	Edge() : num(-1), vert(-1) {}
-	Edge(int _num, int _vert) : num(_num), vert(_vert) {}
+	Edge() : id(-1), startVertex(-1), finishVertex(-1) {}
+	Edge(int _id, int _startVertex, int _finishVertex) : id(_id),
+														 startVertex(_startVertex),
+														 finishVertex(_finishVertex) {}
 
-	int getNum() const;
-	int getVert() const;
+	int getID() const;
+	int getStartVertex() const;
+	int getFinishVertex() const;
 };
 
 #include"Edge.cpp"
