@@ -2,7 +2,7 @@
 #define _EDGE_H_
 
 class Edge {
-private:
+protected:
 	int id, startVertex, finishVertex;
 public:
 	Edge() : id(-1), startVertex(-1), finishVertex(-1) {}

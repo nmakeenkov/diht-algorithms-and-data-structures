@@ -4,6 +4,19 @@
 #include "FlowEdge.h"
 
 template<typename CapacityType>
+std::istream &operator>>(std::istream &in, FlowEdge<CapacityType> &flowEdge) {
+	int from, to, capacity;
+	in >> from >> to >> capacity;
+	from--;
+	to--;
+	flowEdge.startVertex = from;
+	flowEdge.finishVertex = to;
+	flowEdge.capacity = capacity;
+	return in;
+}
+
+
+template<typename CapacityType>
 CapacityType FlowEdge<CapacityType>::getCapacity() const {
 	return capacity;
 }

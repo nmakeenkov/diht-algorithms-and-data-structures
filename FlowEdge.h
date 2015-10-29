@@ -6,15 +6,21 @@
 #include"Edge.h"
 
 template<typename CapacityType>
+class FlowEdge;
+
+template<typename CapacityType>
+std::istream &operator>>(std::istream &in, FlowEdge<CapacityType> &flowEdge);
+
+template<typename CapacityType>
 class FlowEdge : public Edge {
-private:
+protected:
 	CapacityType capacity, flow;
 	FlowEdge *reversedEdge;
 public:
 	FlowEdge() : Edge(), capacity(CapacityType()), flow(CapacityType()),
 				 reversedEdge(NULL) {}
-	FlowEdge(int _id, int _startVertex, int _finishVertex,
-			 CapacityType _capacity, CapacityType _flow = CapacityType()) :
+	FlowEdge(int _id, int _startVertex = 0, int _finishVertex = 0,
+			 CapacityType _capacity = CapacityType(), CapacityType _flow = CapacityType()) :
 			Edge(_id, _startVertex, _finishVertex), capacity(_capacity), flow(_flow),
 			reversedEdge(NULL) {}
 	FlowEdge(FlowEdge *_reversedEdge) :
@@ -27,6 +33,9 @@ public:
 
 	void setReversedEdge(FlowEdge<CapacityType> *_reversedEdge);
 	void incFlow(CapacityType d);
+
+	friend std::istream &operator>> <>(std::istream &in,
+									   FlowEdge<CapacityType> &flowEdge);
 };
 
 #include"FlowEdge.cpp"
