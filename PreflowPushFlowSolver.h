@@ -8,16 +8,18 @@
 template<typename CapacityType>
 class PreflowPushFlowSolver : public Net<CapacityType> {
 private:
-	std::vector<int> h, hCnt;
-	std::vector<CapacityType> exc;
-	std::queue<int> q;
+	std::vector<int> height, heightCount;
+	std::vector<CapacityType> excess;
+	std::queue<int> vertexQueue;
+	std::vector<int> indexOfCurrentEdge;
 
 	void relable(int v);
-	void push(int v, FlowEdge<CapacityType> *u);
+	void push(FlowEdge<CapacityType> *edge);
+	void discharge(int v);
 public:
 	PreflowPushFlowSolver() : Net<CapacityType>() {}
 	
-	void runPreflowPush(int s, int t);
+	void runPreflowPush(int source, int sink);
 };
 
 #include"PreflowPushFlowSolver.cpp"

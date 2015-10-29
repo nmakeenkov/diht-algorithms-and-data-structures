@@ -10,85 +10,87 @@ void PreflowPushFlowSolver<CapacityType>::relable(int v) {
 	for (int i = 0; i < (int)Net<CapacityType>::e[v].size(); ++i) {
 		FlowEdge<CapacityType> *edge = Net<CapacityType>::e[v][i];
 		if (edge->getCapacity() > edge->getFlow()) {
-			newHeight = std::min(h[edge->getFinishVertex()] + 1, newHeight);
+			newHeight = std::min(height[edge->getFinishVertex()] + 1, newHeight);
 		}
 	}
-	hCnt[h[v]]--;
+	heightCount[height[v]]--;
 	int gapC = Net<CapacityType>::getV();
-	if (hCnt[h[v]] == 0)
-		gapC = h[v];	
-	h[v] = newHeight;
-	hCnt[h[v]]++;
+	if (heightCount[height[v]] == 0)
+		gapC = height[v];
+	height[v] = newHeight;
+	heightCount[height[v]]++;
 	if (gapC < Net<CapacityType>::getV()) {
-		for (int i = 0; i < (int)h.size(); ++i) {
-			if (h[i] > gapC && h[i] < Net<CapacityType>::getV()) {
-				hCnt[h[i]]--;
-				h[i] = Net<CapacityType>::getV();
-				hCnt[h[i]]++;
+		for (int i = 0; i < (int)height.size(); ++i) {
+			if (height[i] > gapC && height[i] < Net<CapacityType>::getV()) {
+				heightCount[height[i]]--;
+				height[i] = Net<CapacityType>::getV();
+				heightCount[height[i]]++;
 			}
 		}
 	}
 }
 
 template<typename CapacityType>
-void PreflowPushFlowSolver<CapacityType>::push(int v, 
-		FlowEdge<CapacityType> *e) {
-	CapacityType f = std::min(exc[v], e->getCapacity() - e->getFlow());
-	e->incFlow(f);
-	exc[v] -= f;
-	int u = e->getFinishVertex();
-	exc[u] += f;
-	if (exc[u] > CapacityType() && exc[u] <= f) { // was <= 0 
-			// and now >= 0
-		q.push(u);
+void PreflowPushFlowSolver<CapacityType>::push(FlowEdge<CapacityType> *edge) {
+	CapacityType flow = std::min(excess[edge->getStartVertex()], edge->getCapacity() - edge->getFlow());
+	edge->incFlow(flow);
+	excess[edge->getStartVertex()] -= flow;
+	int u = edge->getFinishVertex();
+	excess[u] += flow;
+	if (excess[u] > CapacityType() && excess[u] <= flow) { // was 0 and now >= 0
+		vertexQueue.push(u);
+	}
+}
+
+
+template<typename CapacityType>
+void PreflowPushFlowSolver<CapacityType>::discharge(int v) {
+	while (excess[v] > 0) {
+		if (indexOfCurrentEdge[v] == (int)Net<CapacityType>::e[v].size()) {
+			relable(v);
+			indexOfCurrentEdge[v] = 0;
+		} else {
+			FlowEdge<CapacityType> *ed = Net<CapacityType>::e[v][indexOfCurrentEdge[v]];
+			if (ed->getCapacity() - ed->getFlow() > CapacityType()
+				&& height[ed->getFinishVertex()] == height[v] - 1) {
+				push(ed);
+			} else {
+				indexOfCurrentEdge[v]++;
+			}
+		}
 	}
 }
 
 template<typename CapacityType>
-void PreflowPushFlowSolver<CapacityType>::runPreflowPush(int s, 
-		int t) {
-	h = std::vector<int>(Net<CapacityType>::getV(), 0);
-	hCnt = std::vector<int>(Net<CapacityType>::getV() * 2, 0);
-	hCnt[Net<CapacityType>::getV()] = 1;
-	hCnt[0] = Net<CapacityType>::getV() - 1;
-	h[s] = Net<CapacityType>::getV();
-	exc = std::vector<CapacityType>(Net<CapacityType>::getV(), 
+void PreflowPushFlowSolver<CapacityType>::runPreflowPush(int source, int sink) {
+	height = std::vector<int>(Net<CapacityType>::getV(), 0);
+	heightCount = std::vector<int>(Net<CapacityType>::getV() * 2, 0);
+	heightCount[Net<CapacityType>::getV()] = 1;
+	heightCount[0] = Net<CapacityType>::getV() - 1;
+	height[source] = Net<CapacityType>::getV();
+	excess = std::vector<CapacityType>(Net<CapacityType>::getV(),
 			CapacityType());
-	for (int i = 0; i < (int)Net<CapacityType>::e[s].size(); ++i) {
-		FlowEdge<CapacityType> *ed = Net<CapacityType>::e[s][i];
-		ed->incFlow(ed->getCapacity());
-		exc[ed->getFinishVertex()] += ed->getCapacity();
-		exc[s] -= ed->getCapacity();
+	for (int i = 0; i < (int)Net<CapacityType>::e[source].size(); ++i) {
+		FlowEdge<CapacityType> *edge = Net<CapacityType>::e[source][i];
+		edge->incFlow(edge->getCapacity());
+		excess[edge->getFinishVertex()] += edge->getCapacity();
+		excess[source] -= edge->getCapacity();
 	}
-	for (int i = 0; i < (int)Net<CapacityType>::e[t].size(); ++i) {
-		exc[t] -= Net<CapacityType>::e[t][i]->getReversedEdge()->getCapacity();
+	for (int i = 0; i < (int)Net<CapacityType>::e[sink].size(); ++i) {
+		excess[sink] -= Net<CapacityType>::e[sink][i]->getReversedEdge()->getCapacity();
 	}
 	for (int i = 0; i < (int)Net<CapacityType>::getV(); ++i) {
-		if (exc[i] > 0) {
-			q.push(i);
+		if (excess[i] > 0) {
+			vertexQueue.push(i);
 		}
 	}
-	std::vector<int> ind(Net<CapacityType>::getV(), 0);
-	while (!q.empty()) {
-		int v = q.front();
-		q.pop();
-		while (exc[v] > 0) {
-			if (ind[v] == (int)Net<CapacityType>::e[v].size()) {
-				relable(v);
-				ind[v] = 0;
-			} else {
-				FlowEdge<CapacityType> *ed = 
-						Net<CapacityType>::e[v][ind[v]];
-				if (ed->getCapacity() - ed->getFlow() > CapacityType()
-						&& h[ed->getFinishVertex()] == h[v] - 1) {
-					push(v, ed);		
-				} else {
-					ind[v]++;
-				}
-			}
-		}
+	indexOfCurrentEdge = std::vector<int>(Net<CapacityType>::getV(), 0);
+	while (!vertexQueue.empty()) {
+		int v = vertexQueue.front();
+		vertexQueue.pop();
+		discharge(v);
 	}
-	Net<CapacityType>::flow = -exc[s];
+	Net<CapacityType>::flow = -excess[source];
 }
 
 #endif
