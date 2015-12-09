@@ -15,12 +15,12 @@ std::istream &operator>>(std::istream &in, Net<CapacityType> &g) {
 	in >> n >> m;
 	g.e.resize(n);
 	for (int i = 0; i < m; ++i) {
-		FlowEdge<CapacityType> *dir = new FlowEdge<CapacityType>(i);
-		in >> (*dir);
-		FlowEdge<CapacityType> *rev = new FlowEdge<CapacityType>(dir);
-		dir->setReversedEdge(rev);
-		g.e[dir->getStartVertex()].push_back(dir);
-		g.e[rev->getStartVertex()].push_back(rev);
+		FlowEdge<CapacityType> *directEdge = new FlowEdge<CapacityType>(i);
+		in >> (*directEdge);
+		FlowEdge<CapacityType> *reversedEdge = new FlowEdge<CapacityType>(directEdge);
+		directEdge->setReversedEdge(reversedEdge);
+		g.e[directEdge->getStartVertex()].push_back(directEdge);
+		g.e[reversedEdge->getStartVertex()].push_back(reversedEdge);
 	}
 	return in;
 }

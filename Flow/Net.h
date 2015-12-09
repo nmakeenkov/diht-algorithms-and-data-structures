@@ -7,6 +7,7 @@
 #include<ostream>
 #include"FlowEdge.h"
 #include"Graph.h"
+#include"BFSGraph.h"
 
 template<typename CapacityType>
 class Net;
@@ -23,7 +24,7 @@ protected:
 	CapacityType flow;
 	std::vector<std::vector<FlowEdge<CapacityType> *> > e;
 public:
-	Net() : Graph() {}
+	Net() : Graph(), flow(), e(0) {}
 	
 	size_t getV() const;
 
@@ -31,6 +32,12 @@ public:
 			Net<CapacityType> &g);
 	friend std::ostream &operator<< <>(std::ostream &out, 
 			Net<CapacityType> &g);
+    template<class Graph, class IsValidEdgeFunction>
+    friend void BFSGraph::bfs(Graph const &graph, int start, std::vector<int> &distanceToVertex,
+                       IsValidEdgeFunction const &isValidEdge);
+    friend class FlowSolver;
+    friend class DinicFlowSolver;
+    friend class PreflowPushFlowSolver;
 };
 
 #include"Net.cpp"

@@ -4,22 +4,22 @@
 #include<vector>
 #include<queue>
 #include"Net.h"
+#include"FlowSolver.h"
 
-template<typename CapacityType>
-class PreflowPushFlowSolver : public Net<CapacityType> {
+class PreflowPushFlowSolver : public FlowSolver {
 private:
 	std::vector<int> height, heightCount;
-	std::vector<CapacityType> excess;
+	std::vector<long long> excess;
 	std::queue<int> vertexQueue;
 	std::vector<int> indexOfCurrentEdge;
 
 	void relable(int v);
-	void push(FlowEdge<CapacityType> *edge);
+	void push(FlowEdge<long long> *edge);
 	void discharge(int v);
 public:
-	PreflowPushFlowSolver() : Net<CapacityType>() {}
-	
-	void runPreflowPush(int source, int sink);
+	PreflowPushFlowSolver(Net<long long> &_graph) : FlowSolver(_graph) {}
+
+    virtual void solve(int source, int sink);
 };
 
 #include"PreflowPushFlowSolver.cpp"

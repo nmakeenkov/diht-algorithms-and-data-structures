@@ -2,7 +2,6 @@
 #define _GRAPH_H_
 
 #include<vector>
-#include<iostream>
 #include"Edge.h"
 
 class Graph {
@@ -10,8 +9,7 @@ protected:
 	std::vector<std::vector<Edge*> > e;
 public:
 	Graph() {}
+	int getV() const;
 };
-
-#include "Graph.cpp"
 
 #endif
