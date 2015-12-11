@@ -10,7 +10,8 @@ private:
 	std::vector<int> suffixArray;
 	bool haveAnswer;
 
-	class CompareSuffixes;
+	class CompareSuffixesStupid;
+    class CompareSuffixesForMerge;
 public:
 	KSSuffixArrayBuilder();
 	KSSuffixArrayBuilder(std::string const &_s);
@@ -43,7 +44,7 @@ int main() {
 	std::cin >> k;
 	std::getline(std::cin, s);
 	std::getline(std::cin, s);
-	int n = s.size();
+	int n = (int)s.size();
 	for (int i = 0; i < k; ++i) {
 		s.push_back(s[i]);
 	}
@@ -98,7 +99,7 @@ namespace Utils {
 	template <typename T, typename getDigit>
 	void radixSort(std::vector<T> &x, size_t max, size_t digitCount,
 			getDigit const &dig) {
-		for (int i = digitCount - 1; i >= 0; --i) {
+		for (int i = (int)digitCount - 1; i >= 0; --i) {
 			GetDigitByNumber<T, getDigit> sd(i, dig);
 			countingSort(x, max, sd);
 		}
@@ -110,7 +111,7 @@ KSSuffixArrayBuilder::KSSuffixArrayBuilder(std::string const &_s) :
 		haveAnswer(false) {
 	s.resize(_s.size());
 	for (int i = 0; i < (int)s.size(); ++i) {
-		s[i] = _s[i];
+		s[i] = (unsigned int)_s[i];
 	}
 }
 KSSuffixArrayBuilder::KSSuffixArrayBuilder(std::vector<unsigned int> 
@@ -127,11 +128,11 @@ KSSuffixArrayBuilder::KSSuffixArrayBuilder(Iterator const &itBegin,
 	s[i] = '$';
 }
 
-class KSSuffixArrayBuilder::CompareSuffixes {
+class KSSuffixArrayBuilder::CompareSuffixesStupid {
 private:
 	std::vector<unsigned int> const &s;
 public:
-	CompareSuffixes(std::vector<unsigned int> const &_s) : s(_s) {}
+	CompareSuffixesStupid(std::vector<unsigned int> const &_s) : s(_s) {}
 	bool operator()(int a, int b) const {
 		if (a == b) {
 			return false;
@@ -148,6 +149,68 @@ public:
 		}
 		return (s[a] < s[b]);
 	}
+};
+
+class KSSuffixArrayBuilder::CompareSuffixesForMerge {
+private:
+    std::vector<unsigned int> const &s;
+    std::vector<int> const &ans0;
+    std::vector<int> const &ans12;
+    std::vector<int> rank0;
+    std::vector<int> rank12;
+    int n;
+public:
+    CompareSuffixesForMerge(std::vector<unsigned int> const &_s, std::vector<int> const &_ans0,
+                            std::vector<int> const &_ans12, int _n) :
+            s(_s), ans0(_ans0), ans12(_ans12),
+            rank0(_ans0.size() + _ans12.size(), -1), rank12(_ans0.size() + _ans12.size(), -1), n(_n) {
+        for (int i = 0; i < (int)ans0.size(); ++i) {
+            rank0[ans0[i]] = i;
+        }
+        for (int i = 0; i < (int)ans12.size(); ++i) {
+            rank12[ans12[i]] = i;
+        }
+    }
+
+    bool operator()(int t1, int t2) {
+        int i = rank12[t1];
+        int j = rank0[t2];
+
+        if (ans12[i] >= n) {
+            return true;
+        }
+        if (ans0[j] >= n) {
+            return false;
+        }
+
+        if (s[ans12[i]] < s[ans0[j]]) {
+            return true;
+        }
+        if (s[ans12[i]] > s[ans0[j]]) {
+            return false;
+        }
+
+        if (ans12[i] % 3 == 1) {
+            if (rank12[ans12[i] + 1] < rank12[ans0[j] + 1]) {
+                   return true;
+            } else {
+                return false;
+            }
+        } else { // ans12[i] % 3 == 2
+            if (s[ans12[i] + 1] < s[ans0[j] + 1]) {
+                return true;
+            }
+            if (s[ans12[i] + 1] > s[ans0[j] + 1]) {
+                return false;
+            }
+            // equal
+            if (rank12[ans12[i] + 2] < rank12[ans0[j] + 2]) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }
 };
 
 class GetElementByNumber {
@@ -170,7 +233,7 @@ void KSSuffixArrayBuilder::solve() {
 		for (int i = 0; i < (int)suffixArray.size(); ++i) {
 			suffixArray[i] = i;
 		}
-		CompareSuffixes x(s);
+		CompareSuffixesStupid x(s);
 		std::sort(suffixArray.begin(), suffixArray.end(), x);
 		haveAnswer = true;
 		return;
@@ -190,7 +253,7 @@ void KSSuffixArrayBuilder::solve() {
 			cur[0] = s[i];
 			cur[1] = (i + 1 < (int)s.size() ? s[i + 1] : '#');
 			cur[2] = (i + 2 < (int)s.size() ? s[i + 2] : '#');
-			cur[3] = i;
+			cur[3] = (unsigned int)i;
 			alph.push_back(cur);
 		}
 	}
@@ -222,109 +285,38 @@ void KSSuffixArrayBuilder::solve() {
 	KSSuffixArrayBuilder _x(newString);
 	std::vector<int> const &newAns = _x.getArray();
 	std::vector<int> ans12;
-	std::vector<int> rank12(s.size());
 	for (int i = 0; i < (int)newAns.size(); ++i) {
 		if (newAns[i] < (int)s.size() / 3) {
 			ans12.push_back(3 * newAns[i] + 1);
 		} else {
 			ans12.push_back(3 * (newAns[i] - (int)s.size() / 3) + 2);
 		}
-		rank12[ans12.back()] = (int)ans12.size() - 1;
 	}
 	// build 0
-	std::vector<std::pair<int, unsigned int> > ans0;
+	std::vector<std::pair<int, unsigned int> > _ans0;
 	for (int i = 0; i < (int)ans12.size(); ++i) {
 		if (ans12[i] % 3 == 1) {
-			ans0.push_back(std::make_pair(ans12[i], s[ans12[i] - 1]));
+			_ans0.push_back(std::make_pair(ans12[i], s[ans12[i] - 1]));
 		}
 	}
-	Utils::countingSort(ans0, alphSize, GetSecondElementOfPair());
-	// merge
-	suffixArray.clear();
-	int i = 0;
-	int j = 0;
-	while (i < (int)ans12.size() || j < (int)ans0.size()) {
-		if (i == (int)ans12.size()) {
-			if (ans0[j].first - 1 < n) {
-				suffixArray.push_back(ans0[j].first - 1);
-			}
-			j++;
-			continue;
-		}
-		if (j == (int)ans0.size()) {
-			if (ans12[i] < n) {
-				suffixArray.push_back(ans12[i]);
-			}
-			i++;
-			continue;
-		}
-		if (ans12[i] >= n) {
-			i++;
-			continue;
-		}
-		if (ans0[j].first - 1 >= n) {
-			j++;
-			continue;
-		}
+	Utils::countingSort(_ans0, alphSize, GetSecondElementOfPair());
 
-		if (s[ans12[i]] < s[ans0[j].first - 1]) {
-			if (ans12[i] < n) {
-				suffixArray.push_back(ans12[i]);
-			}
-			i++;
-			continue;
-		}
-		if (s[ans12[i]] > s[ans0[j].first - 1]) {
-			if (ans0[j].first - 1 < n) {
-				suffixArray.push_back(ans0[j].first - 1);
-			}
-			j++;
-			continue;
-		}
+    std::vector<int> ans0(_ans0.size());
+    for (int i = 0; i < (int)_ans0.size(); ++i) {
+        ans0[i] = _ans0[i].first - 1;
+    }
 
+    // merge
+    std::vector<int> resultOfMerge(ans0.size() + ans12.size());
+    std::merge(ans0.begin(), ans0.end(), ans12.begin(), ans12.end(), resultOfMerge.begin(),
+               CompareSuffixesForMerge(s, ans0, ans12, n));
 
-		if (ans12[i] % 3 == 1) {
-			if (rank12[ans12[i] + 1] < rank12[ans0[j].first]) {
-				if (ans12[i] < n) {
-					suffixArray.push_back(ans12[i]);
-				}
-				i++;
-			} else {
-				if (ans0[j].first - 1 < n) {
-					suffixArray.push_back(ans0[j].first - 1);
-				}
-				j++;
-			}
-		} else { // ans12[i] % 3 == 2
-			if (s[ans12[i] + 1] < s[ans0[j].first]) {
-				if (ans12[i] < n) {
-					suffixArray.push_back(ans12[i]);
-				}
-				i++;
-				continue;
-			}
-			if (s[ans12[i] + 1] > s[ans0[j].first]) {
-				if (ans0[j].first - 1 < n) {
-					suffixArray.push_back(ans0[j].first - 1);
-				}
-				j++;
-				continue;
-			}
-			// equal
-			if (rank12[ans12[i] + 2] < rank12[ans0[j].first + 1]) {
-				if (ans12[i] < n) {
-					suffixArray.push_back(ans12[i]);
-				}
-				i++;
-			} else {
-				if (ans0[j].first - 1 < n) {
-					suffixArray.push_back(ans0[j].first - 1);
-				}
-				j++;
-			}
-		}
-	}
-
+    suffixArray.clear();
+    for (int i = 0; i < (int)resultOfMerge.size(); ++i) {
+        if (resultOfMerge[i] < n) {
+            suffixArray.push_back(resultOfMerge[i]);
+        }
+    }
 	haveAnswer = true;
 }
 
@@ -342,7 +334,7 @@ KasaiLCPBuilder::KasaiLCPBuilder(std::string const &_s,
 		s(_s), suffixArray(_suffixArray), haveAnswer(false) {}
 
 void KasaiLCPBuilder::solve() {
-	int n = s.size();
+	int n = (int)s.size();
 	std::vector<int> rank(n);
 	for (int i = 0; i < n; ++i) {
 		rank[suffixArray[i]] = i;
